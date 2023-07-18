@@ -8,7 +8,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.String(250), nullable=False)
     is_active = db.Column(db.Boolean(), nullable=False, default=False)
     favorite_characters = db.relationship(
         'Character', secondary='favorite_characters', backref='users', lazy=True)
@@ -84,14 +84,14 @@ class Planet(db.Model):
 
 favorite_characters = db.Table('favorite_characters',
                                db.Column('user_id', db.Integer,
-                                         db.ForeignKey('users.id')),
+                                         db.ForeignKey('users.id'), primey_key=True),
                                db.Column('character_id', db.Integer,
-                                         db.ForeignKey('characters.id'))
+                                         db.ForeignKey('characters.id'), primey_key=True)
                                )
 
 favorite_planets = db.Table('favorite_planets',
                             db.Column('user_id', db.Integer,
-                                      db.ForeignKey('users.id')),
+                                      db.ForeignKey('users.id'), primey_key=True),
                             db.Column('planet_id', db.Integer,
-                                      db.ForeignKey('planets.id'))
+                                      db.ForeignKey('planets.id'), primey_key=True)
                             )

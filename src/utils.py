@@ -53,6 +53,11 @@ def get_all_users():
     return users
 
 
+def get_user_by_email(email):
+    user = User.query.filter_by(email=email).first()
+    return user
+
+
 def get_user_by_id(id):
     user = User.query.get(id)
     return user
@@ -95,6 +100,40 @@ def delete_user_by_id(id):
     if user is None:
         return False
     db.session.delete(user)
+    db.session.commit()
+    return True
+
+
+def save_favorite_planet(user_id, planet_id):
+    planet = get_planet_by_id(planet_id)
+    if planet is None:
+        return False
+    user = get_user_by_id(user_id)
+    user.favorite_planets.append(planet)
+    db.session.commit()
+    return True
+
+
+def save_favorite_character(user_id, character_id):
+    character = get_character_by_id(character_id)
+    if character is None:
+        return False
+
+    user = get_user_by_id(user_id)
+    user.favorite_characters.append(character)
+    db.session.commit()
+    return True
+
+
+def remove_favorite_planet(user_id, planet_id):
+    planet = get_planet_by_id(planet_id)
+    user = get_user_by_id(user_id)
+    if planet is None:
+        return False
+    if planet not in user.favorite_planets:
+        return False
+
+    user.favorite_planets.remove(planet)
     db.session.commit()
     return True
 
