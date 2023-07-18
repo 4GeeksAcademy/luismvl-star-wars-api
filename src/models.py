@@ -84,14 +84,12 @@ class Planet(db.Model):
 
 favorite_characters = db.Table('favorite_characters',
                                db.Column('user_id', db.Integer,
-                                         db.ForeignKey('users.id'), primey_key=True),
+                                         db.ForeignKey('users.id'), primary_key=True),
                                db.Column('character_id', db.Integer,
-                                         db.ForeignKey('characters.id'), primey_key=True)
+                                         db.ForeignKey('characters.id'), primary_key=True)
                                )
 
 favorite_planets = db.Table('favorite_planets',
-                            db.Column('user_id', db.Integer,
-                                      db.ForeignKey('users.id'), primey_key=True),
-                            db.Column('planet_id', db.Integer,
-                                      db.ForeignKey('planets.id'), primey_key=True)
-                            )
+                        db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+                        db.Column('planet_id', db.Integer, db.ForeignKey('planets.id'), primary_key=True)
+                    )
