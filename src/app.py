@@ -61,16 +61,19 @@ def login():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
     if not email or not password:
-        return {'message': 'Email and password are required.'}, 400
+        raise APIException(
+            message='Email and password are required', status_code=400)
 
     user = get_user_by_email(email)
     if user is None:
-        return {'message': 'User not found'}, 404
+        raise APIException(
+            message='User not found', status_code=404)
 
     is_pswd_correct = bcrypt.check_password_hash(user.password, password)
 
     if not is_pswd_correct:
-        return {'message': 'Password is incorrect'}, 401
+        raise APIException(
+            message='Password is incorrect', status_code=401)
 
     access_token = create_access_token(identity=user.id)
     return {"user": user.serialize(), 'token': access_token}, 200
@@ -100,39 +103,36 @@ def all_favorites():
 @jwt_required()
 def add_favorite_planet(planet_id):
     current_user_id = get_jwt_identity()
-    user = get_user_by_id(current_user_id)
-    success = save_favorite_planet(user.id, planet_id)
+    favorite_planets_updated = save_favorite_planet(current_user_id, planet_id)
 
-    if success:
-        return {'favorite_planets': [p.serialize() for p in user.favorite_planets]}, 200
-    else:
-        return {'message': 'Planet not found'}, 404
+    return {'favorite_planets': [p.serialize() for p in favorite_planets_updated]}, 200
 
 
 @app.route('/favorite/people/<int:character_id>', methods=['POST'])
 @jwt_required()
 def add_favorite_character(character_id):
     current_user_id = get_jwt_identity()
-    user = get_user_by_id(current_user_id)
-    success = save_favorite_character(user.id, character_id)
-
-    if success:
-        return {'favorite_people': [p.serialize() for p in user.favorite_characters]}, 200
-    else:
-        return {'message': 'Planet not found'}, 404
+    favorite_characters_updated = save_favorite_character(
+        current_user_id, character_id)
+    return {'favorite_characters': [c.serialize() for c in favorite_characters_updated]}, 200
 
 
 @app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
 @jwt_required()
 def delete_favorite_planet(planet_id):
     current_user_id = get_jwt_identity()
-    user = get_user_by_id(current_user_id)
-    success = remove_favorite_planet(user.id, planet_id)
+    favorite_planets_updated = remove_planet_from_favorites(
+        current_user_id, planet_id)
+    return {'favorite_planets': [p.serialize() for p in favorite_planets_updated]}, 200
 
-    if success:
-        return {'favorite_planets': [p.serialize() for p in user.favorite_planets]}, 200
-    else:
-        return {'message': 'Planet not found'}, 404
+
+@app.route('/favorite/people/<int:character_id>', methods=['DELETE'])
+@jwt_required()
+def delete_favorite_character(character_id):
+    current_user_id = get_jwt_identity()
+    favorite_characters_updated = remove_character_from_favorites(
+        current_user_id, character_id)
+    return {'favorite_planets': [c.serialize() for c in favorite_characters_updated]}, 200
 
 
 @app.route('/users/<int:user_id>', methods=['GET'])

@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -84,12 +85,18 @@ class Planet(db.Model):
 
 favorite_characters = db.Table('favorite_characters',
                                db.Column('user_id', db.Integer,
-                                         db.ForeignKey('users.id'), primary_key=True),
+                                         db.ForeignKey('users.id'), ),
                                db.Column('character_id', db.Integer,
-                                         db.ForeignKey('characters.id'), primary_key=True)
+                                         db.ForeignKey('characters.id')),
+                               db.UniqueConstraint(
+                                   'user_id', 'character_id', name='favorite_characters_unique')
                                )
 
 favorite_planets = db.Table('favorite_planets',
-                        db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
-                        db.Column('planet_id', db.Integer, db.ForeignKey('planets.id'), primary_key=True)
-                    )
+                            db.Column('user_id', db.Integer,
+                                      db.ForeignKey('users.id')),
+                            db.Column('planet_id', db.Integer,
+                                      db.ForeignKey('planets.id')),
+                            db.UniqueConstraint(
+                                'user_id', 'planet_id', name='favorite_planets_unique')
+                            )

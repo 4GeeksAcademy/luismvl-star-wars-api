@@ -1,5 +1,6 @@
-from flask import jsonify, url_for
+from flask import url_for
 from models import db, User, Character, Planet
+from sqlalchemy import exc
 
 
 class APIException(Exception):
@@ -107,35 +108,63 @@ def delete_user_by_id(id):
 def save_favorite_planet(user_id, planet_id):
     planet = get_planet_by_id(planet_id)
     if planet is None:
-        return False
+        raise APIException(
+            message='Planet not found', status_code=404)
+
     user = get_user_by_id(user_id)
-    user.favorite_planets.append(planet)
-    db.session.commit()
-    return True
+    try:
+        user.favorite_planets.append(planet)
+        db.session.commit()
+    except exc.IntegrityError:
+        raise APIException(
+            message='Planet is already favorite', status_code=400)
+    return user.favorite_planets
 
 
 def save_favorite_character(user_id, character_id):
     character = get_character_by_id(character_id)
     if character is None:
-        return False
+        raise APIException(
+            message='Character not found', status_code=404)
 
     user = get_user_by_id(user_id)
-    user.favorite_characters.append(character)
-    db.session.commit()
-    return True
+    try:
+        user.favorite_characters.append(character)
+        db.session.commit()
+    except exc.IntegrityError:
+        raise APIException(
+            message='Character is already favorite', status_code=400)
+    return user.favorite_characters
 
 
-def remove_favorite_planet(user_id, planet_id):
+def remove_planet_from_favorites(user_id, planet_id):
     planet = get_planet_by_id(planet_id)
     user = get_user_by_id(user_id)
     if planet is None:
-        return False
+        raise APIException(
+            message='Planet not found', status_code=404)
     if planet not in user.favorite_planets:
-        return False
+        raise APIException(
+            message='Planet is not saved in favorites', status_code=400)
 
     user.favorite_planets.remove(planet)
     db.session.commit()
-    return True
+    return user.favorite_planets
+
+
+def remove_character_from_favorites(user_id, character_id):
+    character = get_character_by_id(character_id)
+    user = get_user_by_id(user_id)
+    if character is None:
+        raise APIException(
+            message='Character not found', status_code=404)
+    if character not in user.favorite_characters:
+        raise APIException(
+            message='Character is not saved in favorites', status_code=400)
+
+    user.favorite_characters.remove(character)
+    db.session.commit()
+    return user.favorite_characters
 
 
 # Characters utils
