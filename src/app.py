@@ -56,6 +56,25 @@ def sitemap():
 
 # Auth endpoints
 
+@app.route('/register', methods=['POST'])
+def create_user():
+    request_body = request.get_json()
+
+    missing_values = validate_user(request_body)
+    if len(missing_values) > 0:
+        return {'message': f'Missing value for: {", ".join(missing_values)}'}, 400
+
+    # if_active es opcional
+    if 'is_active' not in request_body:
+        request_body['is_ative'] = False
+
+    request_body['password'] = bcrypt.generate_password_hash(
+        request_body['password']).decode('utf-8')
+    user = save_new_user(request_body)
+
+    return user.serialize(), 200
+
+
 @app.route("/token", methods=["POST"])
 def login():
     email = request.json.get("email", None)
@@ -140,25 +159,6 @@ def get_user(user_id):
     user = get_user_by_id(user_id)
     if (user is None):
         return {'message': 'User not found'}, 404
-
-    return user.serialize(), 200
-
-
-@app.route('/users', methods=['POST'])
-def create_user():
-    request_body = request.get_json()
-
-    missing_values = validate_user(request_body)
-    if len(missing_values) > 0:
-        return {'message': f'Missing value for: {", ".join(missing_values)}'}, 400
-
-    # if_active es opcional
-    if 'is_active' not in request_body:
-        request_body['is_ative'] = False
-
-    request_body['password'] = bcrypt.generate_password_hash(
-        request_body['password']).decode('utf-8')
-    user = save_new_user(request_body)
 
     return user.serialize(), 200
 
