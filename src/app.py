@@ -60,6 +60,11 @@ def sitemap():
 def create_user():
     request_body = request.get_json()
 
+    user = User.query.filter_by(email=request_body['email']).first()
+    if user is not None:
+        raise APIException(
+            message='Email already in use', status_code=409)
+
     missing_values = validate_user(request_body)
     if len(missing_values) > 0:
         return {'message': f'Missing value for: {", ".join(missing_values)}'}, 400
