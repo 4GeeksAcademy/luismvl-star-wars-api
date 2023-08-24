@@ -75,7 +75,7 @@ def create_user():
 
     request_body['password'] = bcrypt.generate_password_hash(
         request_body['password']).decode('utf-8')
-    user = save_new_user(request_body)
+    new_user = save_new_user(request_body)
 
     return user.serialize(), 200
 
